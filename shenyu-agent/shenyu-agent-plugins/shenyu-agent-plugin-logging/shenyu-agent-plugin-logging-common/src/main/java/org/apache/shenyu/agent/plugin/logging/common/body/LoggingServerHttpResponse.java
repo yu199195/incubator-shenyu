@@ -43,6 +43,7 @@ import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -100,7 +101,7 @@ public class LoggingServerHttpResponse extends ServerHttpResponseDecorator {
     private Flux<? extends DataBuffer> appendResponse(final Publisher<? extends DataBuffer> body) {
         ShenyuContext shenyuContext = exchange.getAttribute(Constants.CONTEXT);
         assert shenyuContext != null;
-        if (getStatusCode() != null) {
+        if (Objects.nonNull(getStatusCode())) {
             logInfo.setStatus(getStatusCode().value());
         }
         logInfo.setResponseHeader(LogCollectUtils.getResponseHeaders(getHeaders()));
@@ -134,7 +135,7 @@ public class LoggingServerHttpResponse extends ServerHttpResponseDecorator {
             logInfo.setRpcType(shenyuContext.getRpcType());
             if (RpcTypeEnum.HTTP.getName().equals(shenyuContext.getRpcType())) {
                 URI uri = exchange.getAttribute(Constants.HTTP_URI);
-                if (uri != null) {
+                if (Objects.nonNull(uri)) {
                     logInfo.setUpstreamIp(uri.getHost());
                 } else {
                     String domain = (String) exchange.getAttributes().get(Constants.HTTP_DOMAIN);
@@ -159,7 +160,7 @@ public class LoggingServerHttpResponse extends ServerHttpResponseDecorator {
         }
         logInfo.setResponseBody(body);
         // collect log
-        if (logCollector != null) {
+        if (Objects.nonNull(logCollector)) {
             logCollector.collect(logInfo);
         }
     }

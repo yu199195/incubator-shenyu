@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -40,15 +41,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public abstract class AbstractLogCollector implements LogCollector {
 
     private static final Logger LOG = LoggerFactory.getLogger(AbstractLogCollector.class);
-
-    private final ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
-
+    
     private final int bufferSize;
-
-    private final int batchSize = 100;
-
-    private final int diffTimeMSForPush = 100;
-
+    
     private final BlockingQueue<ShenyuRequestLog> bufferQueue;
 
     private long lastPushTime;
@@ -62,13 +57,14 @@ public abstract class AbstractLogCollector implements LogCollector {
         bufferSize = LogCollectConfigUtils.getGlobalLogConfig().getBufferQueueSize();
         bufferQueue = new LinkedBlockingDeque<>(bufferSize);
         if (logCollectClient != null) {
+            ExecutorService threadExecutor = Executors.newSingleThreadExecutor();
             threadExecutor.execute(this::consume);
         }
     }
 
     @Override
     public void collect(final ShenyuRequestLog log) {
-        if (log == null || logCollectClient == null) {
+        if (Objects.isNull(log) || Objects.isNull(logCollectClient)) {
             return;
         }
         if (bufferQueue.size() < bufferSize) {
@@ -81,11 +77,13 @@ public abstract class AbstractLogCollector implements LogCollector {
      */
     private void consume() {
         while (started.get()) {
+            int diffTimeMSForPush = 100;
             try {
                 List<ShenyuRequestLog> logs = new ArrayList<>();
                 int size = bufferQueue.size();
                 long time = System.currentTimeMillis();
                 long timeDiffMs = time - lastPushTime;
+                int batchSize = 100;
                 if (size >= batchSize || timeDiffMs > diffTimeMSForPush) {
                     bufferQueue.drainTo(logs, batchSize);
                     logCollectClient.consume(logs);
@@ -103,9 +101,8 @@ public abstract class AbstractLogCollector implements LogCollector {
     @Override
     public void close() throws Exception {
         started.set(false);
-        if (logCollectClient != null) {
+        if (Objects.nonNull(logCollectClient)) {
             logCollectClient.close();
         }
     }
-    
 }

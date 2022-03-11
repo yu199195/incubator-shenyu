@@ -82,14 +82,13 @@ public class RocketMQLogCollectClient implements LogConsumeClient {
      * store logs.
      *
      * @param logs list of log
-     * @throws Exception produce exception
      */
     @Override
-    public void consume(final List<ShenyuRequestLog> logs) throws Exception {
+    public void consume(final List<ShenyuRequestLog> logs) {
         if (CollectionUtils.isEmpty(logs)) {
             return;
         }
-        logs.stream().forEach(log -> {
+        logs.forEach(log -> {
             String logTopic = StringUtils.defaultIfBlank(LogCollectConfigUtils.getTopic(log.getPath()), topic);
             Message message = new Message(logTopic, JsonUtils.toJson(log).getBytes(StandardCharsets.UTF_8));
             try {
@@ -103,10 +102,9 @@ public class RocketMQLogCollectClient implements LogConsumeClient {
     /**
      * close producer.
      *
-     * @throws Exception producer Exception
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         producer.shutdown();
     }
 }

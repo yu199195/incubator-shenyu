@@ -63,11 +63,7 @@ public class CountingSampler implements Sampler {
         int result = dividend % divisor;
         return result >= 0 ? result : divisor + result;
     }
-
-    /**
-     * Reservoir sampling algorithm borrowed from Stack Overflow.
-     * http://stackoverflow.com/questions/12817946/generate-a-random-bitset-with-n-1s
-     */
+    
     /**
      * Reservoir sampling algorithm borrowed from Stack Overflow.
      * http://stackoverflow.com/questions/12817946/generate-a-random-bitset-with-n-1s

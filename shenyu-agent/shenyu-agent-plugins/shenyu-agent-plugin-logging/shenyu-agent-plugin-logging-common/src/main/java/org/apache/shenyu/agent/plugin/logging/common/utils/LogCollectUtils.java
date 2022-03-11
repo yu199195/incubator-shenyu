@@ -69,5 +69,4 @@ public class LogCollectUtils {
         }
         return JsonUtils.toJson(headers.entrySet());
     }
-
 }
